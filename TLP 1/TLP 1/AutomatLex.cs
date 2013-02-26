@@ -6,7 +6,7 @@ using System.IO;
 
 namespace TLP_1
 {    
-    class AutomatLex : ConstTables
+    class AutomatLex
     {
         string _parsedString; // обрабатываемая строка
 
@@ -22,6 +22,8 @@ namespace TLP_1
         Dictionary<string, string> IDs = new Dictionary<string, string>();
         // таблица для чисел
         Dictionary<string, string> numbers = new Dictionary<string, string>();
+
+        ConstTables variable = new ConstTables();
 
         public AutomatLex(string s)
         {
@@ -106,7 +108,7 @@ namespace TLP_1
                     pos = i;
                     //выделяем идентификатор и если он соотвествует служебному слову, то переходим в состояние ошибки
                     temp_s = _parsedString.Substring(position, i - position);
-                    if (_reservedWords.ContainsKey(temp_s))
+                    if (variable._reservedWords.ContainsKey(temp_s))
                     {
                         //Переход в состояние ошибки
                     }
@@ -120,7 +122,7 @@ namespace TLP_1
                     // иначе добавляем его в таблицу идентификаторов и потом записываем в файл
                     else
                     {
-                        IDs_values[count_I] = "I" + Convert.ToString(count_I + 1);
+                        IDs_values.Add(("I" + Convert.ToString(count_I + 1)));
                         IDs.Add(temp_s, IDs_values[count_I]);
                         count_I++;
                         file.Write(IDs[temp_s]);
@@ -128,7 +130,7 @@ namespace TLP_1
                     }
 
                     // добавляем код разделителя в файл
-                    file.Write(_separators["["]);
+                    file.Write(variable._separators["["]);
                     file.Write(" ");
                     ++i;
                     position = i;
@@ -152,7 +154,7 @@ namespace TLP_1
                         // иначе добавляем его в таблицу и записываем
                         else
                         {
-                            Const_values[count_C] = "C" + Convert.ToString(count_C + 1);
+                            Const_values.Add(("C" + Convert.ToString(count_C + 1)));
                             numbers.Add(temp_s, Const_values[count_C]);
                             count_C++;
                             file.Write(numbers[temp_s]);
@@ -177,7 +179,7 @@ namespace TLP_1
                         // переходим в состояние ошибки
                     }
 
-                    file.Write(_separators["]"]);
+                    file.Write(variable._separators["]"]);
                     file.Write(" ");
                     ++i;
                     position = i;
@@ -185,13 +187,13 @@ namespace TLP_1
                 }
 
                 // если встречаем пробел или конец строки, то добавляем в файл код обработанного слова
-                if (_parsedString[i] == '_' || _parsedString[i] == '\0')
+                if (_parsedString[i] == ' ' || _parsedString[i] == '\0')
                 {
-                    temp_s = _parsedString.Substring(position, position - i + 1);
+                    temp_s = _parsedString.Substring(position, i - position + 1);
 
-                    if (_reservedWords.ContainsKey(temp_s))
+                    if (variable._reservedWords.ContainsKey(temp_s))
                     {
-                        file.Write(_reservedWords[temp_s]);
+                        file.Write(variable._reservedWords[temp_s]);
                         file.Write(" ");
                     }
                     else if (IDs.ContainsKey(temp_s))
@@ -201,7 +203,7 @@ namespace TLP_1
                     }
                     else
                     {
-                        IDs_values[count_I] = "I" + Convert.ToString(count_I + 1);
+                        IDs_values.Add(( "I" + Convert.ToString(count_I + 1)));
                         IDs.Add(temp_s, IDs_values[count_I]);
                         count_I++;
                         file.Write(IDs[temp_s]);

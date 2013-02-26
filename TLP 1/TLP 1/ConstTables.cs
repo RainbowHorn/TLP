@@ -7,7 +7,7 @@ namespace TLP_1
 {
     class ConstTables
     {
-        protected Dictionary<string, string> _reservedWords = new Dictionary<string, string>()
+        public Dictionary<string, string> _reservedWords = new Dictionary<string, string>()
         {
                 {"auto", "W1"},
                 {"break", "W2"},
@@ -43,7 +43,7 @@ namespace TLP_1
                 {"while", "W32"}
         };
 
-        protected Dictionary<string, string> _operations = new Dictionary<string, string>()
+        public Dictionary<string, string> _operations = new Dictionary<string, string>()
         {
                 {".", "O1"},
                 {"->", "O2"},
@@ -84,7 +84,7 @@ namespace TLP_1
                 {",", "O37"}
         };
 
-        protected Dictionary<string, string> _separators = new Dictionary<string, string>()
+        public Dictionary<string, string> _separators = new Dictionary<string, string>()
         {
             {":","S1"},
             {";","S2"},

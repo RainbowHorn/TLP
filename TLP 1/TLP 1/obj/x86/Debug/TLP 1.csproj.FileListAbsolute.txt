@@ -1,0 +1,5 @@
+c:\users\andru\documents\visual studio 2010\Projects\TLP 1\TLP 1\bin\Debug\TLP 1.exe
+c:\users\andru\documents\visual studio 2010\Projects\TLP 1\TLP 1\bin\Debug\TLP 1.pdb
+c:\users\andru\documents\visual studio 2010\Projects\TLP 1\TLP 1\obj\x86\Debug\TLP 1.exe
+c:\users\andru\documents\visual studio 2010\Projects\TLP 1\TLP 1\obj\x86\Debug\TLP 1.pdb
+C:\Users\Andru\Documents\Visual Studio 2010\Projects\TLP 1\TLP 1\obj\x86\Debug\TLP 1.csprojResolveAssemblyReference.cache

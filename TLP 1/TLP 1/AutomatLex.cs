@@ -78,9 +78,22 @@ namespace TLP_1
         {
             int position = 0;
 
-            if (IsCharacter(_parsedString[position]))
+            while (true)
             {
-                WordsFunc(ref position);
+                if (position >= _parsedString.Length)
+                    break;
+
+                if (IsCharacter(_parsedString[position]))
+                {
+                    WordsFunc(ref position);
+                    continue;
+                }
+
+                if (IsDigit(_parsedString[position]))
+                {
+                    DigitFunc(ref position);
+                    continue;
+                }
             }
 
             file.Close();
@@ -96,6 +109,45 @@ namespace TLP_1
 
             while (true)
             {
+                // если встречаем пробел или конец строки, то добавляем в файл код обработанного слова
+                if (i >= _parsedString.Length || _parsedString[i] == ' ')
+                {
+                    temp_s = _parsedString.Substring(position, i - position);
+
+                    if (temp_s == "")
+                    {
+                        ++i;
+                        position = i;
+                        break;
+                    }
+
+                    if (variable._reservedWords.ContainsKey(temp_s))
+                    {
+                        file.Write(variable._reservedWords[temp_s]);
+                        file.Write(" ");
+                    }
+                    else if (IDs.ContainsKey(temp_s))
+                    {
+                        file.Write(IDs[temp_s]);
+                        file.Write(" ");
+                    }
+                    else
+                    {
+                        IDs_values.Add(("I" + Convert.ToString(count_I + 1)));
+                        IDs.Add(temp_s, IDs_values[count_I]);
+                        count_I++;
+                        file.Write(IDs[temp_s]);
+                        file.Write(" ");
+                    }
+
+                    if (i <= _parsedString.Length)
+                    {
+                        ++i;
+                        position = i;
+                    }
+                    break;
+                }
+                
                 if (IsCharacter(_parsedString[i]) || IsDigit(_parsedString[i]))
                 {
                     i++;
@@ -140,7 +192,7 @@ namespace TLP_1
                 // встречаем конец индексации
                 if (_parsedString[i] == ']')
                 {
-                    temp_s = _parsedString.Substring(pos + 1, i - pos + 1);
+                    temp_s = _parsedString.Substring(pos + 1, i - pos - 1);
 
                     // проверяем, является ли индекс массива числом
                     if (IsDigit(temp_s[0]))
@@ -186,46 +238,77 @@ namespace TLP_1
                     continue;
                 }
 
-                // если встречаем пробел или конец строки, то добавляем в файл код обработанного слова
-                if (_parsedString[i] == ' ' || _parsedString[i] == '\0')
-                {
-                    temp_s = _parsedString.Substring(position, i - position + 1);
-
-                    if (variable._reservedWords.ContainsKey(temp_s))
-                    {
-                        file.Write(variable._reservedWords[temp_s]);
-                        file.Write(" ");
-                    }
-                    else if (IDs.ContainsKey(temp_s))
-                    {
-                        file.Write(IDs[temp_s]);
-                        file.Write(" ");
-                    }
-                    else
-                    {
-                        IDs_values.Add(( "I" + Convert.ToString(count_I + 1)));
-                        IDs.Add(temp_s, IDs_values[count_I]);
-                        count_I++;
-                        file.Write(IDs[temp_s]);
-                        file.Write(" ");
-                    }
-
-                    if (_parsedString[i] == ' ')
-                    {
-                        ++i;
-                        position = i;
-                    }
-                    break;
-                }
-
                 // если встречаем символ операции, то вызываем функцию для обработки операций
                 if (IsOperation(_parsedString[i]))
                 {
+                    position = i;
                     OperFunc(ref position);
+                    break;
                 }
             }
 
         }
+
+        public void DigitFunc(ref int position)
+        {
+            int i = position;
+            string temp_s;
+
+            while (true)
+            {
+                if (i >= _parsedString.Length || _parsedString[i] == ' ')
+                {
+                    temp_s = _parsedString.Substring(position, i - position);
+
+                    if (numbers.ContainsKey(temp_s))
+                    {
+                        file.Write(numbers[temp_s]);
+                        file.Write(" ");
+                    }
+                    else
+                    {
+                        Const_values.Add(("C" + Convert.ToString(count_C + 1)));
+                        numbers.Add(temp_s, Const_values[count_C]);
+                        count_C++;
+                        file.Write(numbers[temp_s]);
+                        file.Write(" ");
+                    }
+
+                    if (i <= _parsedString.Length)
+                    {
+                        ++i;
+                        position = i;
+                    }
+
+                    break;
+                }
+                
+                if (IsDigit(_parsedString[i]))
+                {
+                    i++;
+                    continue;
+                }
+
+                if (_parsedString[i] == '.')
+                {
+                    position = i;
+                    DotFunc(ref position);
+                    break;
+                }
+
+                if (IsOperation(_parsedString[i]))
+                {
+                    position = i;
+                    OperFunc(ref position);
+                    break;
+                }
+            }
+        }
+
+        public void DotFunc(ref int position)
+        {
+        }
+
 
         public void OperFunc (ref int position)
         {

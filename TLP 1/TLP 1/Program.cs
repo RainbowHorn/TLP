@@ -9,7 +9,7 @@ namespace TLP_1
     {
         static void Main(string[] args)
         {
-            string temp = "for d";
+            string temp = "a[2] a 2";
             AutomatLex a = new AutomatLex(temp);
             a.StartAutomat();
         }

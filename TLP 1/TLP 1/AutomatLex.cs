@@ -78,8 +78,10 @@ namespace TLP_1
         {
             int position = 0;
 
+            // проверяем, является ли первый символ буквой, цифрой, точкой, знаком / или символом операции
             while (true)
             {
+                // проверка на конец строки
                 if (position >= _parsedString.Length)
                     break;
 
@@ -94,8 +96,16 @@ namespace TLP_1
                     DigitFunc(ref position);
                     continue;
                 }
+
+                if (_parsedString[position] == '.')
+                {
+                    DotFunc(ref position, position);
+                    continue;
+                }
             }
 
+            file.Write(variable._separators["\0"]);
+            file.WriteLine();
             file.Close();
  
         }
@@ -121,11 +131,19 @@ namespace TLP_1
                         break;
                     }
 
+                    if (i <= _parsedString.Length)
+                    {
+                        ++i;
+                        position = i;
+                    }
+
+                    // проверка на принадлженость служебным словам
                     if (variable._reservedWords.ContainsKey(temp_s))
                     {
                         file.Write(variable._reservedWords[temp_s]);
                         file.Write(" ");
                     }
+                        // проверка на существование такого идентификатора
                     else if (IDs.ContainsKey(temp_s))
                     {
                         file.Write(IDs[temp_s]);
@@ -140,11 +158,6 @@ namespace TLP_1
                         file.Write(" ");
                     }
 
-                    if (i <= _parsedString.Length)
-                    {
-                        ++i;
-                        position = i;
-                    }
                     break;
                 }
                 
@@ -155,7 +168,7 @@ namespace TLP_1
                 }
 
                 // встречаем начало индексации
-                if (_parsedString[i] == '[')
+                if (_parsedString[i] == '[' || _parsedString[i] == ':' || _parsedString[i] == ';')
                 {
                     pos = i;
                     //выделяем идентификатор и если он соотвествует служебному слову, то переходим в состояние ошибки
@@ -182,8 +195,21 @@ namespace TLP_1
                     }
 
                     // добавляем код разделителя в файл
-                    file.Write(variable._separators["["]);
-                    file.Write(" ");
+                    if (_parsedString[i] == '[')
+                    {
+                        file.Write(variable._separators["["]);
+                        file.Write(" ");
+                    }
+                    else if (_parsedString[i] == ':')
+                    {
+                        file.Write(variable._separators[":"]);
+                        file.Write(" ");
+                    }
+                    else
+                    {
+                        file.Write(variable._separators[";"]);
+                        file.Write(" ");
+                    }
                     ++i;
                     position = i;
                     continue;
@@ -249,6 +275,7 @@ namespace TLP_1
 
         }
 
+        // обработка ситуации, когда первый символ цифра
         public void DigitFunc(ref int position)
         {
             int i = position;
@@ -256,10 +283,25 @@ namespace TLP_1
 
             while (true)
             {
+                // если встречаем пробел или конец строки, то записываем код обработанного слова 
                 if (i >= _parsedString.Length || _parsedString[i] == ' ')
                 {
                     temp_s = _parsedString.Substring(position, i - position);
 
+                    if (temp_s == "")
+                    {
+                        ++i;
+                        position = i;
+                        break;
+                    }
+                    
+                    if (i <= _parsedString.Length)
+                    {
+                        ++i;
+                        position = i;
+                    }
+                    
+                    // проверка на существования такой константы в таблице констант
                     if (numbers.ContainsKey(temp_s))
                     {
                         file.Write(numbers[temp_s]);
@@ -274,12 +316,6 @@ namespace TLP_1
                         file.Write(" ");
                     }
 
-                    if (i <= _parsedString.Length)
-                    {
-                        ++i;
-                        position = i;
-                    }
-
                     break;
                 }
                 
@@ -289,13 +325,43 @@ namespace TLP_1
                     continue;
                 }
 
+                // если число вещественное
                 if (_parsedString[i] == '.')
                 {
+                    int temp_pos = position;
                     position = i;
-                    DotFunc(ref position);
+                    DotFunc(ref position, temp_pos);
                     break;
                 }
 
+                if (_parsedString[i] == ';')
+                {
+                    temp_s = _parsedString.Substring(position, i - position);
+
+                    // проверка на существования такой константы в таблице констант
+                    if (numbers.ContainsKey(temp_s))
+                    {
+                        file.Write(numbers[temp_s]);
+                        file.Write(" ");
+                    }
+                    else
+                    {
+                        Const_values.Add(("C" + Convert.ToString(count_C + 1)));
+                        numbers.Add(temp_s, Const_values[count_C]);
+                        count_C++;
+                        file.Write(numbers[temp_s]);
+                        file.Write(" ");
+                    }
+
+                    file.Write(variable._separators[";"]);
+                    file.Write(" ");
+
+                    ++i;
+                    position = i;
+                    continue;
+                }
+
+                // если к числу применяется постфиксная или префиксная операция
                 if (IsOperation(_parsedString[i]))
                 {
                     position = i;
@@ -305,8 +371,64 @@ namespace TLP_1
             }
         }
 
-        public void DotFunc(ref int position)
+        // обработка вещественных чисел. 
+        // Второй аргумент - позиция начала числа (на случай, если перед точкой есть цифры)
+        public void DotFunc(ref int position, int temp_pos)
         {
+            int i = position + 1;
+            string temp_s;
+
+            while (true)
+            {
+                // если встречаем пробел или конец строки, то записываем код обработанного слова 
+                if (i >= _parsedString.Length || _parsedString[i] == ' ')
+                {
+                    temp_s = _parsedString.Substring(temp_pos, i - temp_pos);
+
+                    if (temp_s == "")
+                    {
+                        ++i;
+                        position = i;
+                        break;
+                    }
+
+                    if (i <= _parsedString.Length)
+                    {
+                        ++i;
+                        position = i;
+                    }
+
+                    // проверка на существования такой константы в таблице констант
+                    if (numbers.ContainsKey(temp_s))
+                    {
+                        file.Write(numbers[temp_s]);
+                        file.Write(" ");
+                    }
+                    else
+                    {
+                        Const_values.Add(("C" + Convert.ToString(count_C + 1)));
+                        numbers.Add(temp_s, Const_values[count_C]);
+                        count_C++;
+                        file.Write(numbers[temp_s]);
+                        file.Write(" ");
+                    }
+
+                    break;
+                }
+
+                // если встречаем цифры, мантиссу и порядок
+                if (IsDigit(_parsedString[i]) || _parsedString[i] == 'E' || _parsedString[i] == '+'
+                    || _parsedString[i] == '-')
+                {
+                    i++;
+                    continue;
+                }
+
+                if (IsCharacter(_parsedString[i]))
+                {
+                    // переход в состояние ошибки
+                }
+            }
         }
 
 

@@ -13,6 +13,12 @@ namespace TLP_1
             StreamReader fileInput = new StreamReader(@"input.txt");
             string temp;
             int u = 0;
+
+            Dictionary<String, String> IDsTable;
+            Dictionary<String, String> NumbersTable;
+            Dictionary<String, String> StringConstTable;
+
+
             Automat a = new Automat();
 
             while (true)
@@ -26,6 +32,9 @@ namespace TLP_1
                 else
                 {
                     a.TableWrite();
+                    IDsTable = a.GetIDTable();
+                    NumbersTable = a.GetNumbersTable();
+                    StringConstTable = a.GetStringTable();
                     a.CloseFile();
                     break;
                 }

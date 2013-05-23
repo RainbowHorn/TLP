@@ -63,6 +63,51 @@ namespace TLP_1
 
             r.StartRPN(ref u);
             r.CloseFile();
+
+            StreamReader fileRPN = new StreamReader(@"RPN.txt");
+            String tempRPN = "";
+
+            while (true)
+            {
+                String l = fileRPN.ReadLine();
+
+                if (l != null)
+                {
+                    tempRPN = tempRPN + " " + l;
+                }
+                else
+                {
+                    fileRPN.Close();
+                    break;
+                }
+            }
+
+            tempRPN = tempRPN.Substring(1);
+            Int32 p = tempRPN.Length - 1;
+            tempRPN = tempRPN.Substring(0, p);
+
+            MIT m = new MIT(IDsTable, NumbersTable, StringConstTable, tempRPN);
+
+            m.Start(ref u);
+            m.CloseFile();
+
+            StreamReader fileFortran = new StreamReader(@"Fortran.txt");
+            String tempFortran = "";
+
+            while (true)
+            {
+                String l = fileFortran.ReadLine();
+
+                if (l != null)
+                {
+                    tempFortran = tempFortran + " " + l;
+                }
+                else
+                {
+                    fileFortran.Close();
+                    break;
+                }
+            }
         }
     }
 }
